@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { Link } from "react-router-dom";
 import sakstatLogoGe from "../assets/images/sakstat-logo.svg";
 import sakstatLogoEn from "../assets/images/sakstat-logo-en.png";
 import headerLogo1 from "../assets/images/header-logo-1.png";
@@ -18,7 +19,23 @@ const Header = ({ language = "GE", setLanguage = () => {} }) => {
 
   const [langOpen, setLangOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [statsOpen, setStatsOpen] = useState(false);
+  const [mobileStatsOpen, setMobileStatsOpen] = useState(false);
   const langRef = useRef(null);
+
+  const sections = [
+    { ge: "ძირითადი მაჩვენებელი", en: "Main Indicators", route: "/statistics/main-indicators" },
+    { ge: "მოსახლეობა", en: "Population", route: "/statistics/population" },
+    { ge: "ჯანმრთელობის დაცვა", en: "Health Care", route: "/statistics/health-care" },
+    { ge: "განათლება", en: "Education", route: "/statistics/education" },
+    { ge: "სოციალური უზრუნველყოფა", en: "Social Protection", route: "/statistics/social-protection" },
+    { ge: "ცხოვრების დონე", en: "Living Standards", route: "/statistics/living-standards" },
+    { ge: "დასაქმება და უმუშევრობა", en: "Employment and Unemployment", route: "/statistics/employment" },
+    { ge: "საინფ. და საკომ. ტექნოლოგიები", en: "ICT", route: "/statistics/ict" },
+    { ge: "ტურიზმი", en: "Tourism", route: "/statistics/tourism" },
+    { ge: "სამართალდარღვევები", en: "Crime", route: "/statistics/offences" },
+    { ge: "ეროვნული ანგარიშები", en: "GDP and National Accounts", route: "/statistics/national-accounts" },
+  ];
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -73,18 +90,18 @@ const Header = ({ language = "GE", setLanguage = () => {} }) => {
 
         {/* LEFT */}
         <div className="flex items-center gap-4">
-          <a href="" className="cursor-pointer">
+          <Link to="/" className="cursor-pointer">
             <img
               src={language === "GE" ? sakstatLogoGe : sakstatLogoEn}
               alt="Sakstat Logo"
               className="h-[45px] w-auto object-contain"
             />
-          </a>
+          </Link>
 
-          <a href="" className="leading-tight cursor-pointer hidden sm:block" style={{ textDecoration: "none", color: "#3d3d3e", fontFeatureSettings: '"cpsp" on, "case" on', fontSize: "14px", fontWeight: "bold" }}>
+          <Link to="/" className="leading-tight cursor-pointer hidden sm:block" style={{ textDecoration: "none", color: "#3d3d3e", fontFeatureSettings: '"cpsp" on, "case" on', fontSize: "14px", fontWeight: "bold" }}>
             <p>{txt.portalLine1}</p>
             <p>{txt.portalLine2}</p>
-          </a>
+          </Link>
 
           <img
             src={headerLogo1}
@@ -182,16 +199,45 @@ const Header = ({ language = "GE", setLanguage = () => {} }) => {
             ))}
           </div>
           {/* Nav links */}
-          {txt.nav.map((item) => (
-            <a
-              key={item}
-              href="#"
-              onClick={() => setMenuOpen(false)}
-              className="text-[15px] text-gray-800 py-2 border-b border-gray-200 hover:text-blue-700"
-            >
-              {item}
-            </a>
-          ))}
+          {txt.nav.map((item, idx) =>
+            idx === 0 ? (
+              <div key={item}>
+                <button
+                  onClick={() => setMobileStatsOpen((prev) => !prev)}
+                  className="flex items-center justify-between w-full text-[15px] text-gray-800 py-2 border-b border-gray-200 hover:text-blue-700 cursor-pointer"
+                >
+                  {item}
+                  <svg className={`w-3 h-3 transition-transform ${mobileStatsOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {mobileStatsOpen && (
+                  <div className="pl-4 flex flex-col">
+                    {sections.map((s) => (
+                      <Link
+                        key={s.route}
+                        to={s.route}
+                        onClick={() => { setMenuOpen(false); setMobileStatsOpen(false); }}
+                        className="text-[14px] text-gray-700 py-2 border-b border-gray-100 hover:text-blue-700"
+                        style={{ fontFamily: "FiraGO", fontFeatureSettings: '"case" on' }}
+                      >
+                        {language === "EN" ? s.en : s.ge}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <a
+                key={item}
+                href="#"
+                onClick={() => setMenuOpen(false)}
+                className="text-[15px] text-gray-800 py-2 border-b border-gray-200 hover:text-blue-700"
+              >
+                {item}
+              </a>
+            )
+          )}
           {/* Socials */}
           <div className="flex items-center gap-4 pt-2">
             <a href="https://www.facebook.com/geostat.ge/" target="_blank" rel="noreferrer">
@@ -210,11 +256,42 @@ const Header = ({ language = "GE", setLanguage = () => {} }) => {
       {/* NAVBAR — desktop only */}
       <nav className="hidden md:block text-white" style={{ background: "#0066e0" }}>
         <div className="flex justify-center items-stretch gap-10 text-[16px]">
-          {txt.nav.map((item) => (
-            <a key={item} href="#" className="flex items-center px-3 py-[20px] transition-colors duration-200 hover:bg-white hover:text-gray-900">
-              {item}
-            </a>
-          ))}
+          {txt.nav.map((item, idx) =>
+            idx === 0 ? (
+              <div
+                key={item}
+                className="relative flex items-stretch"
+                onMouseEnter={() => setStatsOpen(true)}
+                onMouseLeave={() => setStatsOpen(false)}
+              >
+                <button className="flex items-center gap-1 px-3 py-[20px] transition-colors duration-200 hover:bg-white hover:text-gray-900 cursor-pointer">
+                  {item}
+                  <svg className={`w-3 h-3 transition-transform ${statsOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {statsOpen && (
+                  <div className="absolute top-full left-0 bg-white text-gray-800 shadow-xl rounded-b-lg z-50 min-w-[280px] py-1" style={{ border: "1px solid #e5e7eb" }}>
+                    {sections.map((s) => (
+                      <Link
+                        key={s.route}
+                        to={s.route}
+                        onClick={() => setStatsOpen(false)}
+                        className="block px-4 py-2 text-[14px] hover:bg-blue-50 hover:text-blue-700"
+                        style={{ fontFamily: "FiraGO", fontFeatureSettings: '"case" on' }}
+                      >
+                        {language === "EN" ? s.en : s.ge}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <a key={item} href="#" className="flex items-center px-3 py-[20px] transition-colors duration-200 hover:bg-white hover:text-gray-900">
+                {item}
+              </a>
+            )
+          )}
         </div>
       </nav>
     </header>
