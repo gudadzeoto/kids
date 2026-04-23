@@ -1,0 +1,267 @@
+.section-data-page .choosecat {
+  font-size: 18px;
+  color: #37496d;
+  margin: 40px auto 16px;
+  width: min(1124px, 100%);
+  font-weight: 600;
+}
+
+.section-data-page .filelist-filter {
+  display: flex;
+  width: 1124px;
+  max-width: 100%;
+  margin: 0 auto;
+  gap: 20px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.section-data-page .filelist-filter .filter-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 265px;
+  min-width: 265px;
+  height: 100px;
+  background: rgba(240, 240, 240, 0.8);
+  border: 0.25px solid #d7d8d9;
+  border-radius: 5px;
+  padding: 20px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.section-data-page .filelist-filter .filter-item.active {
+  background: #eff9fc;
+}
+
+.section-data-page .filelist-filter .filter-item.active,
+.section-data-page .filelist-filter .filter-item:hover {
+  border: 0.25px solid #a7befc;
+}
+
+.section-data-page .filelist-filter .filter-item p {
+  font-size: 12px;
+  padding: 0 10px;
+  flex-grow: 1;
+  color: #37496d;
+}
+
+.section-data-page .filelist-filter .filter-item input {
+  transform: scale(1.4);
+  cursor: pointer;
+  accent-color: #0066e0;
+}
+
+.section-data-page .filelist {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 22px;
+  align-self: start;
+  margin-top: 32px;
+}
+
+.section-data-page .filelist-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 26px;
+  padding: 18px 15px;
+  width: 1124px;
+  max-width: 100%;
+  flex-shrink: 0;
+  border-radius: 20px;
+  background: linear-gradient(
+    90deg,
+    rgba(224, 234, 252, 0.35) 0%,
+    rgba(207, 222, 243, 0.35) 100%
+  );
+}
+
+.section-data-page .filelist-item .image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 83px;
+  height: 80px;
+  flex-shrink: 0;
+  border-radius: 20px;
+  background: linear-gradient(
+    90deg,
+    rgba(224, 234, 252, 0.35) 0%,
+    rgba(207, 222, 243, 0.35) 100%
+  );
+}
+
+.section-data-page .filelist-item .title {
+  color: #37496d;
+  font-family: FiraGO, sans-serif;
+  font-size: 20px;
+  font-weight: 500;
+  flex: 1;
+  min-width: 220px;
+}
+
+.section-data-page .filelist-item .download {
+  display: flex;
+  border-radius: 15px;
+  background: #363795;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  text-decoration: none;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.section-data-page .filelist-item .download:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+
+.section-data-page .filelist-item .download div {
+  color: white;
+  text-align: center;
+  font-feature-settings: "case" on;
+  font-family: FiraGO, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.section-data-page .filelist-item .show {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.section-data-page .filelist-item .show svg {
+  transition: transform 0.2s ease;
+}
+
+.section-data-page .filelist-item .show.open svg {
+  transform: rotate(180deg);
+}
+
+.section-data-page .filelist-item .download .download-icon.hidden {
+  display: none;
+}
+
+.section-data-page .filelist-item .download .downloaded-icon {
+  display: none;
+}
+
+.section-data-page .filelist-item .download .downloaded-icon.visible {
+  display: inline-block;
+}
+
+.section-data-page .filelist-item .chart {
+  display: flex;
+  flex: 1 1 100%;
+  flex-direction: column;
+  margin-left: 120px;
+  margin-top: -8px;
+  gap: 10px;
+}
+
+.section-data-page .filelist-item .chartdiv1,
+.section-data-page .filelist-item .chartdiv2 {
+  width: 100%;
+  min-height: 220px;
+  border-radius: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.7);
+  color: #37496d;
+  font-family: FiraGO, sans-serif;
+}
+
+.section-data-page .filelist-item .chartdiv2 {
+  display: none;
+}
+
+.section-data-page .filelist-item .chartswitch {
+  text-align: right;
+}
+
+.section-data-page .filelist-item .barchart,
+.section-data-page .filelist-item .linechart {
+  cursor: pointer;
+  opacity: 0.55;
+}
+
+.section-data-page .filelist-item .barchart.active,
+.section-data-page .filelist-item .linechart.active {
+  opacity: 1;
+}
+
+.section-data-page .filelist-item .barchart {
+  margin-right: 15px;
+}
+
+@media (max-width: 991px) {
+  .section-data-page .filelist-filter .filter-item {
+    width: 240px;
+    min-width: 240px;
+    height: 92px;
+    padding: 14px;
+  }
+
+  .section-data-page .filelist-item {
+    gap: 16px;
+    padding: 14px;
+  }
+
+  .section-data-page .filelist-item .title {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 767px) {
+  .section-data-page .choosecat {
+    font-size: 16px;
+    margin-top: 28px;
+  }
+
+  .section-data-page .filelist-filter {
+    gap: 12px;
+  }
+
+  .section-data-page .filelist-filter .filter-item {
+    width: 215px;
+    min-width: 215px;
+    height: 88px;
+    padding: 12px;
+  }
+
+  .section-data-page .filelist-filter .filter-item p {
+    font-size: 11px;
+    padding: 0 8px;
+  }
+
+  .section-data-page .filelist-item {
+    align-items: flex-start;
+    gap: 12px;
+    border-radius: 14px;
+  }
+
+  .section-data-page .filelist-item .image {
+    width: 64px;
+    height: 64px;
+    border-radius: 14px;
+  }
+
+  .section-data-page .filelist-item .title {
+    font-size: 16px;
+    min-width: 100%;
+    order: 2;
+  }
+
+  .section-data-page .filelist-item .download {
+    order: 3;
+    margin-top: 6px;
+  }
+
+  .section-data-page .filelist-item .chart {
+    margin-left: 0;
+    margin-top: 8px;
+  }
+}

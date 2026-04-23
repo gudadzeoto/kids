@@ -230,8 +230,18 @@ const Header = ({ language = "GE", setLanguage = () => {} }) => {
             ) : (
               <a
                 key={item}
-                href="#"
-                onClick={() => setMenuOpen(false)}
+                href={idx === 1 ? "#publications" : idx === 2 ? "#legislation" : idx === 3 ? "#links" : "#"}
+                onClick={(e) => {
+                  if (idx === 1 || idx === 2 || idx === 3) {
+                    e.preventDefault();
+                    const ids = { 1: "publications", 2: "legislation", 3: "links" };
+                    const el = document.getElementById(ids[idx]);
+                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                    setMenuOpen(false);
+                  } else {
+                    setMenuOpen(false);
+                  }
+                }}
                 className="text-[15px] text-gray-800 py-2 border-b border-gray-200 hover:text-blue-700"
               >
                 {item}
@@ -287,7 +297,19 @@ const Header = ({ language = "GE", setLanguage = () => {} }) => {
                 )}
               </div>
             ) : (
-              <a key={item} href="#" className="flex items-center px-3 py-[20px] transition-colors duration-200 hover:bg-white hover:text-gray-900">
+              <a
+                key={item}
+                href={idx === 1 ? "#publications" : idx === 2 ? "#legislation" : idx === 3 ? "#links" : "#"}
+                onClick={(e) => {
+                  if (idx === 1 || idx === 2 || idx === 3) {
+                    e.preventDefault();
+                    const ids = { 1: "publications", 2: "legislation", 3: "links" };
+                    const el = document.getElementById(ids[idx]);
+                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                  }
+                }}
+                className="flex items-center px-3 py-[20px] transition-colors duration-200 hover:bg-white hover:text-gray-900"
+              >
                 {item}
               </a>
             )
