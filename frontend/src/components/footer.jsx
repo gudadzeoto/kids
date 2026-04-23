@@ -53,12 +53,26 @@ const Footer = ({ language = "GE", onGlossaryOpen = () => {} }) => {
             </a>
           </p>
           <p
-            style={{ fontSize: "12px", fontWeight: 400, lineHeight: "30px" }}
+            style={{
+              fontSize: "12px",
+              fontWeight: 400,
+              lineHeight: "30px",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+            }}
             className="mb-6"
           >
-            {isEN
-              ? "30, Tsotne Dadiani Str., 0180, Tbilisi, Georgia"
-              : "ცოტნე დადიანის ქ. 30, თბილისი, 0180"}
+            <a
+              href="https://www.google.com/maps/place/%E1%83%A1%E1%83%90%E1%83%A5%E1%83%90%E1%83%A0%E1%83%97%E1%83%95%E1%83%94%E1%83%9A%E1%83%9D%E1%83%A1+%E1%83%A1%E1%83%A2%E1%83%90%E1%83%A2%E1%83%98%E1%83%A1%E1%83%A2%E1%83%98%E1%83%99%E1%83%98%E1%83%A1+%E1%83%94%E1%83%A0%E1%83%9D%E1%83%95%E1%83%9C%E1%83%A3%E1%83%9A%E1%83%98+%E1%83%A1%E1%83%90%E1%83%9B%E1%83%A1%E1%83%90%E1%83%AE%E1%83%A3%E1%83%A0%E1%83%98/@41.7296526,44.7931013,818m/data=!3m2!1e3!4b1!4m6!3m5!1s0x404472b62853ba09:0xa05d0cb0a0c61544!8m2!3d41.7296487!4d44.7979722!16s%2Fg%2F11hcz12gfm?entry=ttu&g_ep=EgoyMDI2MDQyMC4wIKXMDSoASAFQAw%3D%3D"
+              target="_blank"
+              rel="noreferrer"
+              style={{ color: "white", display: "inline-flex", alignItems: "center", gap: "6px" }}
+            >
+              {isEN
+                ? "30, Tsotne Dadiani Str., 0180, Tbilisi, Georgia"
+                : "ცოტნე დადიანის ქ. 30, თბილისი, 0180"}
+            </a>
           </p>
 
           <h4 className="font-semibold mb-3">
