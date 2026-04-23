@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import sakstatLogoGe from "../assets/images/sakstat-logo.svg";
 import sakstatLogoEn from "../assets/images/sakstat-logo-en.png";
 import headerLogo1 from "../assets/images/header-logo-1.png";
@@ -16,6 +17,8 @@ import compliantIcon from "../assets/images/compliant.png";
 import constructionIcon from "../assets/images/construction.png";
 
 const Header = ({ language = "GE", setLanguage = () => {}, onGlossaryOpen = () => {} }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const [langOpen, setLangOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -82,6 +85,17 @@ const Header = ({ language = "GE", setLanguage = () => {}, onGlossaryOpen = () =
   };
 
   const txt = t[language] ?? t.GE;
+
+  const goToHomeSection = (sectionId) => {
+    if (location.pathname === "/") {
+      const section = document.getElementById(sectionId);
+      if (section) {
+        section.scrollIntoView({ behavior: "smooth" });
+      }
+      return;
+    }
+    navigate(`/#${sectionId}`);
+  };
 
   return (
     <header className="w-full font-firago" style={{ fontFeatureSettings: '"case" on' }}>
@@ -235,11 +249,13 @@ const Header = ({ language = "GE", setLanguage = () => {}, onGlossaryOpen = () =
                   e.preventDefault();
                   if (idx === 1 || idx === 2 || idx === 3) {
                     const ids = { 1: "publications", 2: "legislation", 3: "links" };
-                    const el = document.getElementById(ids[idx]);
-                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                    goToHomeSection(ids[idx]);
                     setMenuOpen(false);
                   } else if (idx === 4) {
                     onGlossaryOpen();
+                    setMenuOpen(false);
+                  } else if (idx === 5) {
+                    navigate("/infographic");
                     setMenuOpen(false);
                   } else {
                     setMenuOpen(false);
@@ -307,10 +323,11 @@ const Header = ({ language = "GE", setLanguage = () => {}, onGlossaryOpen = () =
                   e.preventDefault();
                   if (idx === 1 || idx === 2 || idx === 3) {
                     const ids = { 1: "publications", 2: "legislation", 3: "links" };
-                    const el = document.getElementById(ids[idx]);
-                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                    goToHomeSection(ids[idx]);
                   } else if (idx === 4) {
                     onGlossaryOpen();
+                  } else if (idx === 5) {
+                    navigate("/infographic");
                   }
                 }}
                 className="flex items-center px-3 py-[20px] transition-colors duration-200 hover:bg-white hover:text-gray-900"

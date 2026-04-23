@@ -1,11 +1,25 @@
 import React from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import facebookIcon from "../assets/images/facebook.svg";
 import twitterIcon from "../assets/images/twitter.svg";
 import linkedinIcon from "../assets/images/linkedin.svg";
 
 const Footer = ({ language = "GE", onGlossaryOpen = () => {} }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const year = new Date().getFullYear();
   const isEN = language === "EN";
+
+  const goToHomeSection = (sectionId) => {
+    if (location.pathname === "/") {
+      const section = document.getElementById(sectionId);
+      if (section) {
+        section.scrollIntoView({ behavior: "smooth" });
+      }
+      return;
+    }
+    navigate(`/#${sectionId}`);
+  };
   return (
     <footer
       className="bg-[#005c97] text-white font-firago"
@@ -100,24 +114,28 @@ const Footer = ({ language = "GE", onGlossaryOpen = () => {} }) => {
             <li
               className="hover:underline cursor-pointer"
               style={{ fontSize: "12px", fontWeight: 400, lineHeight: "30px" }}
+              onClick={() => goToHomeSection("statistics")}
             >
               {isEN ? "MAIN STATISTICS" : "სტატისტიკური ინფორმაცია"}
             </li>
             <li
               className="hover:underline cursor-pointer"
               style={{ fontSize: "12px", fontWeight: 400, lineHeight: "30px" }}
+              onClick={() => goToHomeSection("publications")}
             >
               {isEN ? "PUBLICATIONS" : "პუბლიკაციები"}
             </li>
             <li
               className="hover:underline cursor-pointer"
               style={{ fontSize: "12px", fontWeight: 400, lineHeight: "30px" }}
+              onClick={() => goToHomeSection("legislation")}
             >
               {isEN ? "LEGISLATION" : "კანონმდებლობა"}
             </li>
             <li
               className="hover:underline cursor-pointer"
               style={{ fontSize: "12px", fontWeight: 400, lineHeight: "30px" }}
+              onClick={() => goToHomeSection("links")}
             >
               {isEN ? "LINKS" : "ბმულები"}
             </li>
@@ -131,6 +149,7 @@ const Footer = ({ language = "GE", onGlossaryOpen = () => {} }) => {
             <li
               className="hover:underline cursor-pointer"
               style={{ fontSize: "12px", fontWeight: 400, lineHeight: "30px" }}
+              onClick={() => navigate("/infographic")}
             >
               {isEN ? "INFOGRAPHIC" : "ინფოგრაფიკა"}
             </li>

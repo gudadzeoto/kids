@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import slide1 from "../assets/images/slide-1.jpg";
 import slide2 from "../assets/images/slide-2.jpg";
 import slide3 from "../assets/images/slide-3.png";
@@ -1973,6 +1973,7 @@ const Hero = ({ currentSlide, prev, next, goTo, current, language }) => {
 const Main = ({ language = "GE" }) => {
   const [current, setCurrent] = useState(0);
   const intervalRef = useRef(null);
+  const location = useLocation();
   const txt = t[language] ?? t.GE;
 
   const startAutoPlay = () => {
@@ -1985,6 +1986,19 @@ const Main = ({ language = "GE" }) => {
     startAutoPlay();
     return () => clearInterval(intervalRef.current);
   }, []);
+
+  useEffect(() => {
+    if (!location.hash) return;
+    const targetId = location.hash.replace("#", "");
+    const timer = setTimeout(() => {
+      const section = document.getElementById(targetId);
+      if (section) {
+        section.scrollIntoView({ behavior: "smooth" });
+      }
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, [location.hash]);
 
   const goTo = (index) => {
     setCurrent(index);

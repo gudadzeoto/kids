@@ -16,6 +16,7 @@ import ICT from "./pages/sections/ICT";
 import Tourism from "./pages/sections/Tourism";
 import Offences from "./pages/sections/Offences";
 import NationalAccounts from "./pages/sections/NationalAccounts";
+import Infographic from "./pages/sections/Infographic";
 import "./App.scss";
 
 function App() {
@@ -79,6 +80,7 @@ function App() {
           <Route path="/statistics/tourism" element={pageWrapper(Tourism)} />
           <Route path="/statistics/offences" element={pageWrapper(Offences)} />
           <Route path="/statistics/national-accounts" element={pageWrapper(NationalAccounts)} />
+          <Route path="/infographic" element={pageWrapper(Infographic)} />
         </Routes>
       </BrowserRouter>
     </ErrorBoundary>
