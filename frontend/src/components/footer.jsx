@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import facebookIcon from "../assets/images/facebook.svg";
 import twitterIcon from "../assets/images/twitter.svg";
@@ -9,6 +9,7 @@ const Footer = ({ language = "GE", onGlossaryOpen = () => {} }) => {
   const location = useLocation();
   const year = new Date().getFullYear();
   const isEN = language === "EN";
+  const [showGoTop, setShowGoTop] = useState(false);
 
   const goToHomeSection = (sectionId) => {
     if (location.pathname === "/") {
@@ -20,13 +21,58 @@ const Footer = ({ language = "GE", onGlossaryOpen = () => {} }) => {
     }
     navigate(`/#${sectionId}`);
   };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowGoTop(window.scrollY > 300);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const handleGoTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
-    <footer
-      className="bg-[#005c97] text-white font-firago"
-      style={{ fontFeatureSettings: '"case" on' }}
-    >
-      {/* TOP SECTION */}
-      <div className="py-12 px-6 flex flex-col md:flex-row md:justify-around gap-10 md:gap-0">
+    <>
+      {showGoTop && (
+        <button
+          onClick={handleGoTop}
+          aria-label="Go to top"
+          style={{
+            position: "fixed",
+            right: "24px",
+            bottom: "24px",
+            zIndex: 1000,
+            width: "52px",
+            height: "52px",
+            borderRadius: "999px",
+            border: "none",
+            background: "#0066e0",
+            color: "#fff",
+            boxShadow: "0 10px 30px rgba(0, 102, 224, 0.28)",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "22px",
+            fontWeight: 700,
+          }}
+        >
+          ↑
+        </button>
+      )}
+
+      <footer
+        className="bg-[#005c97] text-white font-firago"
+        style={{ fontFeatureSettings: '"case" on' }}
+      >
+        {/* TOP SECTION */}
+        <div className="py-12 px-6 flex flex-col md:flex-row md:justify-around gap-10 md:gap-0">
         {/* LEFT */}
         <div>
           <h3 className="font-semibold text-lg mb-4">
@@ -175,34 +221,35 @@ const Footer = ({ language = "GE", onGlossaryOpen = () => {} }) => {
             {isEN ? "Terms of Use" : "მონაცემთა გამოყენების პირობები"}
           </h3>
         </div>
-      </div>
+        </div>
 
-      {/* BOTTOM BAR */}
-      <div className="border-t border-white/20 text-center text-sm py-4 relative">
-        <p
-          style={{
-            textAlign: "center",
-            fontSize: "0.7rem",
-            fontWeight: "normal",
-          }}
-        >
-          {isEN
-            ? `All rights reserved © Geostat ${year}`
-            : `ყველა უფლება დაცულია © საქსტატი ${year}`}
-        </p>
-        <p
-          style={{
-            textAlign: "center",
-            fontSize: "0.7rem",
-            fontWeight: "normal",
-          }}
-        >
-          {isEN
-            ? "The portal was developed with the financial and technical support of the United Nations Childrens Fund (UNICEF)"
-            : "პორტალი შეიქმნა გაეროს ბავშვთა ფონდის (UNICEF) ტექნიკური და ფინანსური მხარდაჭერით."}
-        </p>
-      </div>
-    </footer>
+        {/* BOTTOM BAR */}
+        <div className="border-t border-white/20 text-center text-sm py-4 relative">
+          <p
+            style={{
+              textAlign: "center",
+              fontSize: "0.7rem",
+              fontWeight: "normal",
+            }}
+          >
+            {isEN
+              ? `All rights reserved © Geostat ${year}`
+              : `ყველა უფლება დაცულია © საქსტატი ${year}`}
+          </p>
+          <p
+            style={{
+              textAlign: "center",
+              fontSize: "0.7rem",
+              fontWeight: "normal",
+            }}
+          >
+            {isEN
+              ? "The portal was developed with the financial and technical support of the United Nations Childrens Fund (UNICEF)"
+              : "პორტალი შეიქმნა გაეროს ბავშვთა ფონდის (UNICEF) ტექნიკური და ფინანსური მხარდაჭერით."}
+          </p>
+        </div>
+      </footer>
+    </>
   );
 };
 
