@@ -3,16 +3,17 @@ const cors = require("cors");
 const sql = require("mssql");
 const config = require("./dbConfig");
 
-const personaltitleRoute = require("./routes/personaltitle");
+const filesRoute = require("./routes/files");
+const glossaryRoute = require("./routes/glossary");
 
 
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3001;
 
 // ✅ IMPORTANT — allow your frontend domain
 const corsOptions = {
   origin: [
-    "https://indexation.geostat.ge",
+    "https://kids.geostat.ge",
     "http://localhost:3000",
     "http://localhost:5173"
   ],
@@ -26,7 +27,8 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 // routes
-app.use("/api/personaltitle", personaltitleRoute);
+app.use("/api/files", filesRoute);
+app.use("/api/glossary", glossaryRoute);
 
 // health check with database status
 app.get("/", async (req, res) => {

@@ -3,7 +3,7 @@ import facebookIcon from "../assets/images/facebook.svg";
 import twitterIcon from "../assets/images/twitter.svg";
 import linkedinIcon from "../assets/images/linkedin.svg";
 
-const Footer = ({ language = "GE" }) => {
+const Footer = ({ language = "GE", onGlossaryOpen = () => {} }) => {
   const year = new Date().getFullYear();
   const isEN = language === "EN";
   return (
@@ -124,6 +124,7 @@ const Footer = ({ language = "GE" }) => {
             <li
               className="hover:underline cursor-pointer"
               style={{ fontSize: "12px", fontWeight: 400, lineHeight: "30px" }}
+              onClick={onGlossaryOpen}
             >
               {isEN ? "GLOSSARY" : "გლოსარიუმი"}
             </li>

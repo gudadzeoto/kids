@@ -15,7 +15,7 @@ import processIcon from "../assets/images/process.png";
 import compliantIcon from "../assets/images/compliant.png";
 import constructionIcon from "../assets/images/construction.png";
 
-const Header = ({ language = "GE", setLanguage = () => {} }) => {
+const Header = ({ language = "GE", setLanguage = () => {}, onGlossaryOpen = () => {} }) => {
 
   const [langOpen, setLangOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -232,11 +232,14 @@ const Header = ({ language = "GE", setLanguage = () => {} }) => {
                 key={item}
                 href={idx === 1 ? "#publications" : idx === 2 ? "#legislation" : idx === 3 ? "#links" : "#"}
                 onClick={(e) => {
+                  e.preventDefault();
                   if (idx === 1 || idx === 2 || idx === 3) {
-                    e.preventDefault();
                     const ids = { 1: "publications", 2: "legislation", 3: "links" };
                     const el = document.getElementById(ids[idx]);
                     if (el) el.scrollIntoView({ behavior: "smooth" });
+                    setMenuOpen(false);
+                  } else if (idx === 4) {
+                    onGlossaryOpen();
                     setMenuOpen(false);
                   } else {
                     setMenuOpen(false);
@@ -301,11 +304,13 @@ const Header = ({ language = "GE", setLanguage = () => {} }) => {
                 key={item}
                 href={idx === 1 ? "#publications" : idx === 2 ? "#legislation" : idx === 3 ? "#links" : "#"}
                 onClick={(e) => {
+                  e.preventDefault();
                   if (idx === 1 || idx === 2 || idx === 3) {
-                    e.preventDefault();
                     const ids = { 1: "publications", 2: "legislation", 3: "links" };
                     const el = document.getElementById(ids[idx]);
                     if (el) el.scrollIntoView({ behavior: "smooth" });
+                  } else if (idx === 4) {
+                    onGlossaryOpen();
                   }
                 }}
                 className="flex items-center px-3 py-[20px] transition-colors duration-200 hover:bg-white hover:text-gray-900"

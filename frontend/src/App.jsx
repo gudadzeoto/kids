@@ -4,6 +4,7 @@ import Header from "./components/Header";
 import Main from "./components/Main";
 import Footer from "./components/footer";
 import ErrorBoundary from "./components/ErrorBoundary";
+import GlossaryModal from "./components/GlossaryModal";
 import MainIndicators from "./pages/sections/MainIndicators";
 import Population from "./pages/sections/Population";
 import HealthCare from "./pages/sections/HealthCare";
@@ -19,6 +20,7 @@ import "./App.scss";
 
 function App() {
   const [language, setLanguage] = useState("GE");
+  const [glossaryOpen, setGlossaryOpen] = useState(false);
 
   const pageWrapper = (Component) => (
     <div
@@ -27,15 +29,16 @@ function App() {
     >
       <div className="w-full flex justify-center" style={{ backgroundColor: "var(--app-bg)" }}>
         <div className="w-full">
-          <Header language={language} setLanguage={setLanguage} />
+          <Header language={language} setLanguage={setLanguage} onGlossaryOpen={() => setGlossaryOpen(true)} />
         </div>
       </div>
+      {glossaryOpen && <GlossaryModal language={language} onClose={() => setGlossaryOpen(false)} />}
       <div className="w-full flex flex-1 justify-center" style={{ marginTop: 0 }}>
         <div className="w-full">
           <Component language={language} />
         </div>
       </div>
-      <Footer className="mt-auto" language={language} setLanguage={setLanguage} />
+      <Footer className="mt-auto" language={language} setLanguage={setLanguage} onGlossaryOpen={() => setGlossaryOpen(true)} />
     </div>
   );
 
@@ -52,15 +55,16 @@ function App() {
               >
                 <div className="w-full flex justify-center" style={{ backgroundColor: "var(--app-bg)" }}>
                   <div className="w-full">
-                    <Header language={language} setLanguage={setLanguage} />
+                    <Header language={language} setLanguage={setLanguage} onGlossaryOpen={() => setGlossaryOpen(true)} />
                   </div>
                 </div>
+                {glossaryOpen && <GlossaryModal language={language} onClose={() => setGlossaryOpen(false)} />}
                 <div className="w-full flex flex-1 justify-center" style={{ marginTop: 0 }}>
                   <div className="w-full">
                     <Main language={language} setLanguage={setLanguage} />
                   </div>
                 </div>
-                <Footer className="mt-auto" language={language} setLanguage={setLanguage} />
+                <Footer className="mt-auto" language={language} setLanguage={setLanguage} onGlossaryOpen={() => setGlossaryOpen(true)} />
               </div>
             }
           />
