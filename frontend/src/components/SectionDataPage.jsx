@@ -533,21 +533,14 @@ const SectionDataPage = ({
 
   return (
     <div className="w-full max-w-screen-2xl mx-auto px-4 py-10 section-data-page">
-      <div style={{ position: "relative", width: "100%" }}>
+      <div className="section-hero">
         <img
+          className="section-hero-image"
           src={slideImg}
           alt={language === "EN" ? titleEN : titleGE}
-          style={{ width: "100%", height: "auto", display: "block" }}
         />
         <button
-          className="flex items-center overflow-hidden rounded-full cursor-pointer"
-          style={{
-            position: "absolute",
-            bottom: "20px",
-            left: "20px",
-            border: "1px solid #0066e0",
-            background: "transparent",
-          }}
+          className="section-hero-button"
           onClick={() =>
             window.open(
               `/coverpdf/${language === "EN" ? "eng" : "geo"}/${coverPdfNumber}.pdf`,
@@ -555,36 +548,18 @@ const SectionDataPage = ({
             )
           }
         >
-          <span
-            className="px-5 py-1.5 font-medium"
-            style={{
-              color: "#0066e0",
-              fontSize: "16px",
-              fontWeight: "bold",
-              fontFamily: "FiraGO",
-            }}
-          >
+          <span className="section-hero-button-label">
             {language === "EN" ? "See more" : "ნახვა"}
           </span>
-          <span
-            className="text-white flex items-center justify-center"
-            style={{
-              background: "#0066e0",
-              fontSize: "20px",
-              fontWeight: "bold",
-              width: "42px",
-              height: "42px",
-            }}
-          >
+          <span className="section-hero-button-arrow">
             ›
           </span>
         </button>
       </div>
 
       <h2
-        className="font-bold mt-8 mb-4"
+        className="section-page-title font-bold mt-8 mb-4"
         style={{
-          fontSize: "30px",
           color: "#37496d",
           textAlign: "center",
           fontFeatureSettings: '"case" on',

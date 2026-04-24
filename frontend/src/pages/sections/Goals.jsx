@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import "../../styles/Goals.scss";
+import goalCoverImg from "../../assets/images/goal-cover.png";
 
 const getGoalImage = (category, language) => {
   const langSuffix = language === "EN" ? "en" : "ka";
@@ -115,25 +116,19 @@ const Goals = ({ language }) => {
   };
 
   return (
-    <div className="w-full max-w-screen-2xl mx-auto px-4 py-10 goals-page">
-      <h2
-        className="font-bold mb-4"
-        style={{
-          fontSize: "30px",
-          color: "#37496d",
-          textAlign: "center",
-          fontFeatureSettings: '"case" on',
-          fontFamily: "FiraGO",
-        }}
-      >
-        {language === "EN" ? "Sustainable Development Goals" : "მდგრადი განვითარების მიზნები"}
-      </h2>
-
-      <div className="flex justify-center mb-8">
-        <svg width="70" height="1" viewBox="0 0 70 1" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <line y1="0.5" x2="70" y2="0.5" stroke="black" />
-        </svg>
+    <div className="w-full max-w-screen-2xl mx-auto goals-page" style={{ paddingTop: "30px" }}>
+      <div className="goals-hero">
+        <img
+          className="goals-hero-image"
+          src={goalCoverImg}
+          alt={language === "EN" ? "Sustainable Development Goals" : "მდგრადი განვითარების მიზნები"}
+        />
+        <div className="goals-hero-title">
+          {language === "EN" ? <>SUSTAINABLE DEVELOPMENT <br />GOALS</> : <>მდგრადი განვითარების <br />მიზნები</>}
+        </div>
       </div>
+
+      <div className="px-4 pb-10">
 
       {loading && (
         <p style={{ textAlign: "center", color: "#37496d", fontFamily: "FiraGO" }}>
@@ -242,6 +237,7 @@ const Goals = ({ language }) => {
             </div>
           );
         })}
+      </div>
       </div>
     </div>
   );
