@@ -1832,7 +1832,58 @@ const StatCards = ({ language }) => {
 
 const Hero = ({ currentSlide, prev, next, goTo, current, language }) => {
   const isMobile = useWindowWidth() < 768;
+  const [lifeCalcOpen, setLifeCalcOpen] = React.useState(false);
   return (
+    <>
+    {lifeCalcOpen && (
+      <div
+        onClick={() => setLifeCalcOpen(false)}
+        style={{
+          position: "fixed",
+          inset: 0,
+          background: "rgba(0,0,0,0.6)",
+          zIndex: 9999,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            background: "#fff",
+            borderRadius: "16px",
+            overflow: "hidden",
+            width: "90vw",
+            maxWidth: "900px",
+            height: "80vh",
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "flex-end", padding: "8px 12px" }}>
+            <button
+              onClick={() => setLifeCalcOpen(false)}
+              aria-label="Close"
+              style={{
+                background: "transparent",
+                border: "none",
+                fontSize: "22px",
+                cursor: "pointer",
+                color: "#333",
+              }}
+            >
+              ✕
+            </button>
+          </div>
+          <iframe
+            src={`https://database.geostat.ge/pyramid/life.php?lang=${language === "EN" ? "en" : "ka"}`}
+            style={{ flex: 1, border: "none", width: "100%" }}
+            title="Life Expectancy Calculator"
+          />
+        </div>
+      </div>
+    )}
     <section
       className={`w-full rounded-[30px] p-4 md:p-10 flex gap-8 items-center ${isMobile ? "flex-col" : "justify-between"}`}
     >
@@ -1949,9 +2000,12 @@ const Hero = ({ currentSlide, prev, next, goTo, current, language }) => {
         </a>
 
         {/* CARD 2 */}
-        <a
-          href="/life-calculator"
-          className="flex-1 rounded-[25px] overflow-hidden relative block"
+        <div
+          className="flex-1 rounded-[25px] overflow-hidden relative block cursor-pointer"
+          onClick={() => setLifeCalcOpen(true)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === "Enter" && setLifeCalcOpen(true)}
         >
           <img
             src={lifeCalcImg}
@@ -1966,9 +2020,10 @@ const Hero = ({ currentSlide, prev, next, goTo, current, language }) => {
               ? "LIFE EXPECTANCY CALCULATOR"
               : "სიცოცხლის მოსალოდნელი ხანგრძლივობის კალკულატორი"}
           </div>
-        </a>
+        </div>
       </div>
     </section>
+    </>
   );
 };
 
@@ -2030,37 +2085,43 @@ const Main = ({ language = "GE" }) => {
 
       {/* ── SECTIONS ── */}
       {txt.sections.map((title, idx) => {
-        const sectionIds = ["statistics", "publications", "sdg", "legislation", "links"];
+        const sectionIds = [
+          "statistics",
+          "publications",
+          "sdg",
+          "legislation",
+          "links",
+        ];
         return (
-        <section
-          key={idx}
-          id={sectionIds[idx]}
-          className={`w-full ${idx === 1 ? "" : "py-10 px-6 md:px-16"}`}
-          style={{ borderBottom: "1px solid #e5e7eb" }}
-        >
-          {idx === 1 ? (
-            <Publications language={language} />
-          ) : (
-            <>
-              <SectionTitle title={title} />
-              {idx === 0 ? (
-                <StatCards language={language} />
-              ) : idx === 2 ? (
-                <SDGSection language={language} />
-              ) : idx === 3 ? (
-                <Legislation language={language} />
-              ) : idx === 4 ? (
-                <Links language={language} />
-              ) : (
-                <div className="mt-4 text-gray-400 text-sm italic text-center">
-                  {language === "GE"
-                    ? "კონტენტი მალე დაემატება..."
-                    : "Content coming soon..."}
-                </div>
-              )}
-            </>
-          )}
-        </section>
+          <section
+            key={idx}
+            id={sectionIds[idx]}
+            className={`w-full ${idx === 1 ? "" : "py-10 px-6 md:px-16"}`}
+            style={{ borderBottom: "1px solid #e5e7eb" }}
+          >
+            {idx === 1 ? (
+              <Publications language={language} />
+            ) : (
+              <>
+                <SectionTitle title={title} />
+                {idx === 0 ? (
+                  <StatCards language={language} />
+                ) : idx === 2 ? (
+                  <SDGSection language={language} />
+                ) : idx === 3 ? (
+                  <Legislation language={language} />
+                ) : idx === 4 ? (
+                  <Links language={language} />
+                ) : (
+                  <div className="mt-4 text-gray-400 text-sm italic text-center">
+                    {language === "GE"
+                      ? "კონტენტი მალე დაემატება..."
+                      : "Content coming soon..."}
+                  </div>
+                )}
+              </>
+            )}
+          </section>
         );
       })}
     </main>
