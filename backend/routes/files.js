@@ -4,35 +4,69 @@ const config = require("../dbConfig");
 
 const router = express.Router();
 
-// GET by ?code= from Hst_FullName
+// GET /api/files?category=1&sub_category=2
 router.get("/", async (req, res) => {
   try {
-    const { code } = req.query;
-    let pool = await sql.connect(config);
-    let request = pool.request();
-    let query;
-    if (code) {
-      request.input("code", sql.NVarChar, code);
-      query = `
-        SELECT [Legal_Code], [Full_Name]
-        FROM [register].[dbo].[Hst_FullName]
-        WHERE [Legal_Code] = @code
-      `;
-    } else {
-      query = `
-        SELECT [Legal_Code], [Full_Name]
-        FROM [register].[dbo].[Hst_FullName]
-      `;
-    }
-    let result = await request.query(query);
+    const { category, sub_category: subCategory } = req.query;
 
-    if (result.recordset.length === 0) {
-      return res.status(404).send("No data found.");
+    const pool = await sql.connect(config);
+    const request = pool.request();
+
+    let query = `
+      SELECT
+        [ID],
+        [category],
+        [sub_category],
+        [title_geo],
+        [title_eng],
+        [path_geo],
+        [path_eng],
+        [chartdata]
+      FROM [kids].[dbo].[files]
+    `;
+
+    const whereClauses = [];
+
+    if (category !== undefined) {
+      const parsedCategory = Number(category);
+
+      if (!Number.isInteger(parsedCategory) || parsedCategory < 1) {
+        pool.close();
+        return res.status(400).json({
+          error: "Invalid category. Use a positive integer value.",
+        });
+      }
+
+      request.input("category", sql.Int, parsedCategory);
+      whereClauses.push("[category] = @category");
     }
+
+    if (subCategory !== undefined) {
+      const parsedSubCategory = Number(subCategory);
+
+      if (!Number.isInteger(parsedSubCategory) || parsedSubCategory < 1) {
+        pool.close();
+        return res.status(400).json({
+          error: "Invalid sub_category. Use a positive integer value.",
+        });
+      }
+
+      request.input("sub_category", sql.Int, parsedSubCategory);
+      whereClauses.push("[sub_category] = @sub_category");
+    }
+
+    if (whereClauses.length > 0) {
+      query += ` WHERE ${whereClauses.join(" AND ")}`;
+    }
+
+    query += ` ORDER BY [ID]`;
+
+    const result = await request.query(query);
+    pool.close();
 
     res.json(result.recordset);
   } catch (err) {
-    res.status(500).send(err.message);
+    res.status(500).json({ error: err.message });
   }
 });
 

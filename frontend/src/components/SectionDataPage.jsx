@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Highcharts from "highcharts";
 import HighchartsReactModule from "highcharts-react-official";
 import geostatLogo from "../assets/images/geostatlogo.svg";
@@ -64,6 +64,169 @@ const resolveFilterImage = (imageKey, language) => {
   return imageMap[imageKey] || geostatLogo;
 };
 
+const mainStatFolderMap = {
+  population: "mosaxleoba",
+  "health-care": "jandacva",
+  education: "education",
+  "social-protection": "social",
+  "living-standards": "cxovrebisdone",
+  employment: "labour",
+  ict: "ICT",
+  tourism: "turizmi",
+  offences: "crime",
+  "national-accounts": "mshp",
+};
+
+const buildSectionFileUrl = (sectionKey, pathValue) => {
+  if (!pathValue) return null;
+
+  if (/^https?:\/\//i.test(pathValue) || pathValue.startsWith("/")) {
+    return pathValue;
+  }
+
+  const normalizedPath = pathValue.replace(/^files\//, "");
+
+  if (normalizedPath.includes("/")) {
+    return `/files/mainstat/${normalizedPath}`;
+  }
+
+  const folderName = mainStatFolderMap[sectionKey];
+  if (!folderName) {
+    return `/files/${normalizedPath}`;
+  }
+
+  return `/files/mainstat/${folderName}/${normalizedPath}`;
+};
+
+const CHART_SERIES_COLORS = ["#0066e0", "#00a3a3", "#f97316", "#7c3aed"];
+
+const getFileSeriesNames = (file) => {
+  const names = [
+    ...(file?.chartdata?.barSeries || []).map((seriesItem) => seriesItem.name),
+    ...(file?.chartdata?.lineSeries || []).map((seriesItem) => seriesItem.name),
+  ];
+
+  return [...new Set(names)];
+};
+
+const getSeriesColorByName = (file, seriesName) => {
+  const orderedSeriesNames = getFileSeriesNames(file);
+  const index = orderedSeriesNames.indexOf(seriesName);
+
+  if (index === -1) {
+    return CHART_SERIES_COLORS[0];
+  }
+
+  return CHART_SERIES_COLORS[index % CHART_SERIES_COLORS.length];
+};
+
+const parseChartData = (rawChartData) => {
+  if (!rawChartData) return null;
+
+  const parsedValue = typeof rawChartData === "string"
+    ? (() => {
+        const base = rawChartData.trim();
+        const candidates = [
+          base,
+          // Some DB rows store JSON with escaped newlines/tabs (e.g. "\\n").
+          base.replace(/\\r\\n|\\n|\\r/g, " ").replace(/\\t/g, " "),
+          base.replace(/\\"/g, '"'),
+          base.replace(/\\"/g, '"').replace(/\\r\\n|\\n|\\r/g, " ").replace(/\\t/g, " "),
+        ];
+
+        for (const candidate of candidates) {
+          try {
+            const once = JSON.parse(candidate);
+            if (typeof once === "string") {
+              try {
+                return JSON.parse(once);
+              } catch {
+                return null;
+              }
+            }
+            return once;
+          } catch {
+            // Try next candidate.
+          }
+        }
+
+        return null;
+      })()
+    : rawChartData;
+
+  if (!parsedValue || typeof parsedValue !== "object") {
+    return null;
+  }
+
+  if (Array.isArray(parsedValue)) {
+    if (parsedValue.length === 0 || typeof parsedValue[0] !== "object") {
+      return null;
+    }
+
+    const categoryKey = Object.prototype.hasOwnProperty.call(parsedValue[0], "year") ? "year" : "label";
+    const seriesKeys = Object.keys(parsedValue[0]).filter((key) => key !== categoryKey);
+
+    if (seriesKeys.length === 0) {
+      return null;
+    }
+
+    return {
+      labels: parsedValue.map((entry) => String(entry[categoryKey] ?? "")),
+      barSeries: seriesKeys.map((key) => ({
+        name: key,
+        data: parsedValue.map((entry) => Number(entry[key]) || 0),
+      })),
+      lineSeries: seriesKeys.map((key) => ({
+        name: key,
+        data: parsedValue.map((entry) => Number(entry[key]) || 0),
+      })),
+    };
+  }
+
+  if (!Array.isArray(parsedValue.labels)) {
+    return null;
+  }
+
+  const bar = Array.isArray(parsedValue.bar) ? parsedValue.bar : [];
+  const line = Array.isArray(parsedValue.line) ? parsedValue.line : bar;
+
+  return {
+    labels: parsedValue.labels,
+    barSeries: [{ name: parsedValue.barLabel || "Value", data: bar }],
+    lineSeries: [{ name: parsedValue.lineLabel || parsedValue.barLabel || "Value", data: line }],
+  };
+};
+
+const parseSubCategories = (rawSubCategory) => {
+  if (rawSubCategory === null || rawSubCategory === undefined) {
+    return [];
+  }
+
+  return String(rawSubCategory)
+    .split(",")
+    .map((value) => Number(value.trim()))
+    .filter(Number.isInteger);
+};
+
+const formatChartLabel = (value) => {
+  const normalizedValue = String(value || "")
+    .replace(/_/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!normalizedValue) {
+    return "";
+  }
+
+  return normalizedValue.replace(/\b[A-Za-z][A-Za-z-]*\b/g, (word) => {
+    if (word === word.toUpperCase()) {
+      return word;
+    }
+
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  });
+};
+
 const createDefaultFilesData = ({ sectionKey, titleGE, titleEN }) => [
   {
     id: 1,
@@ -115,33 +278,129 @@ const SectionDataPage = ({
   filterData = defaultFilterData,
   filesData,
 }) => {
-  const effectiveFilesData = useMemo(
-    () => filesData || createDefaultFilesData({ sectionKey, titleGE, titleEN }),
-    [filesData, sectionKey, titleGE, titleEN],
-  );
+  const [apiFilesData, setApiFilesData] = useState(null);
+  const [filesError, setFilesError] = useState("");
+  const [filesLoading, setFilesLoading] = useState(!filesData);
+
+  useEffect(() => {
+    if (filesData) {
+      setApiFilesData(filesData);
+      setFilesLoading(false);
+      setFilesError("");
+      return undefined;
+    }
+
+    const controller = new AbortController();
+
+    const loadFiles = async () => {
+      try {
+        setFilesLoading(true);
+        setFilesError("");
+
+        const response = await fetch(`/api/files?category=${coverPdfNumber}`, {
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to load files: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const normalizedData = Array.isArray(data)
+          ? data.map((file) => ({
+              id: file.ID,
+              categories: parseSubCategories(file.sub_category),
+              titleGE: file.title_geo,
+              titleEN: file.title_eng,
+              hrefGE: buildSectionFileUrl(sectionKey, file.path_geo),
+              hrefEN: buildSectionFileUrl(sectionKey, file.path_eng),
+              chartdata: parseChartData(file.chartdata),
+            }))
+          : [];
+
+        setApiFilesData(normalizedData);
+      } catch (err) {
+        if (err.name !== "AbortError") {
+          setFilesError(language === "EN" ? "Could not load section files." : "სექციის ფაილების ჩატვირთვა ვერ მოხერხდა.");
+          setApiFilesData([]);
+        }
+      } finally {
+        setFilesLoading(false);
+      }
+    };
+
+    loadFiles();
+
+    return () => controller.abort();
+  }, [coverPdfNumber, filesData, language, sectionKey]);
+
+  const effectiveFilesData = useMemo(() => {
+    if (filesData) {
+      return filesData;
+    }
+
+    if (apiFilesData !== null) {
+      return apiFilesData;
+    }
+
+    return createDefaultFilesData({ sectionKey, titleGE, titleEN });
+  }, [apiFilesData, filesData, sectionKey, titleGE, titleEN]);
+
+  const availableFilterData = useMemo(() => {
+    const usedCategories = new Set();
+
+    effectiveFilesData.forEach((file) => {
+      (file.categories || []).forEach((category) => usedCategories.add(category));
+    });
+
+    return filterData.filter((filter) => filter.categories.some((category) => usedCategories.has(category)));
+  }, [effectiveFilesData, filterData]);
 
   const initialFilters = useMemo(() => {
     const state = {};
-    filterData.forEach((f) => {
+    availableFilterData.forEach((f) => {
       state[f.key] = true;
     });
     return state;
-  }, [filterData]);
+  }, [availableFilterData]);
 
   const [filters, setFilters] = useState(initialFilters);
   const [openCharts, setOpenCharts] = useState({});
   const [chartType, setChartType] = useState({});
+  const [seriesFilters, setSeriesFilters] = useState({});
   const [downloaded, setDownloaded] = useState({});
+
+  useEffect(() => {
+    setFilters((prev) => {
+      const next = {};
+
+      availableFilterData.forEach((filter) => {
+        next[filter.key] = Object.prototype.hasOwnProperty.call(prev, filter.key)
+          ? prev[filter.key]
+          : true;
+      });
+
+      if (Object.keys(next).length === 0) {
+        return {};
+      }
+
+      if (!Object.values(next).some(Boolean)) {
+        next[availableFilterData[0].key] = true;
+      }
+
+      return next;
+    });
+  }, [availableFilterData]);
 
   const activeCategories = useMemo(() => {
     const categorySet = new Set();
-    filterData.forEach((filter) => {
+    availableFilterData.forEach((filter) => {
       if (filters[filter.key]) {
         filter.categories.forEach((category) => categorySet.add(category));
       }
     });
     return categorySet;
-  }, [filterData, filters]);
+  }, [availableFilterData, filters]);
 
   const visibleFiles = useMemo(() => {
     return effectiveFilesData.filter((file) => file.categories.some((category) => activeCategories.has(category)));
@@ -151,18 +410,53 @@ const SectionDataPage = ({
     setFilters((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const toggleChart = (id) => {
+  const toggleChart = (file) => {
+    const id = file.id;
+    const defaultSeriesNames = [
+      ...(file.chartdata?.barSeries || []).map((seriesItem) => seriesItem.name),
+      ...(file.chartdata?.lineSeries || []).map((seriesItem) => seriesItem.name),
+    ];
+
     setOpenCharts((prev) => ({ ...prev, [id]: !prev[id] }));
     setChartType((prev) => ({ ...prev, [id]: prev[id] || "bar" }));
+    setSeriesFilters((prev) => {
+      if (prev[id] || defaultSeriesNames.length === 0) {
+        return prev;
+      }
+
+      return { ...prev, [id]: defaultSeriesNames };
+    });
   };
 
   const setFileChartType = (id, type) => {
     setChartType((prev) => ({ ...prev, [id]: type }));
   };
 
+  const toggleSeriesFilter = (fileId, seriesName) => {
+    setSeriesFilters((prev) => {
+      const current = prev[fileId] || [];
+      const isActive = current.includes(seriesName);
+      const next = isActive
+        ? current.filter((name) => name !== seriesName)
+        : [...current, seriesName];
+
+      return {
+        ...prev,
+        [fileId]: next,
+      };
+    });
+  };
+
   const getChartOptions = (file, activeType) => {
     const isLine = activeType === "line";
-    const seriesData = isLine ? file.chartdata.line : file.chartdata.bar;
+    const allSeries = isLine
+      ? file.chartdata.lineSeries || file.chartdata.barSeries || []
+      : file.chartdata.barSeries || [];
+    const selectedSeries = seriesFilters[file.id];
+    const chartSeries = Array.isArray(selectedSeries) && selectedSeries.length > 0
+      ? allSeries.filter((seriesItem) => selectedSeries.includes(seriesItem.name))
+      : allSeries;
+    const chartTitle = formatChartLabel(language === "EN" ? file.titleEN : file.titleGE);
 
     return {
       chart: {
@@ -173,11 +467,21 @@ const SectionDataPage = ({
           fontFamily: "FiraGO",
         },
       },
-      title: { text: null },
+      title: {
+        text: chartTitle,
+        align: "left",
+        style: {
+          color: "#24324d",
+          fontFamily: "FiraGO",
+          fontSize: "16px",
+          fontWeight: "700",
+        },
+      },
       credits: { enabled: false },
       legend: { enabled: false },
       xAxis: {
         categories: file.chartdata.labels || [],
+        title: { text: null },
         lineColor: "#8ea4c8",
         tickColor: "#8ea4c8",
         labels: {
@@ -198,6 +502,7 @@ const SectionDataPage = ({
         },
       },
       tooltip: {
+        shared: true,
         valueDecimals: 0,
       },
       plotOptions: {
@@ -214,16 +519,15 @@ const SectionDataPage = ({
           },
         },
         series: {
-          color: "#0066e0",
           animation: false,
         },
       },
-      series: [
-        {
-          type: isLine ? "line" : "column",
-          data: seriesData,
-        },
-      ],
+      series: chartSeries.map((seriesItem, index) => ({
+        type: isLine ? "line" : "column",
+        name: formatChartLabel(seriesItem.name),
+        data: seriesItem.data,
+        color: getSeriesColorByName(file, seriesItem.name),
+      })),
     };
   };
 
@@ -301,7 +605,7 @@ const SectionDataPage = ({
       </p>
 
       <div className="filelist-filter">
-        {filterData.map((filter) => (
+        {availableFilterData.map((filter) => (
           <label key={filter.key} className={`filter-item ${filters[filter.key] ? "active" : ""}`}>
             <img src={resolveFilterImage(filter.imageKey, language)} alt="" style={{ width: `${filter.imgWidth}px` }} />
             <p style={{ fontFamily: "FiraGO", fontFeatureSettings: '"case" on' }}>
@@ -315,6 +619,18 @@ const SectionDataPage = ({
           </label>
         ))}
       </div>
+
+      {filesLoading && (
+        <p className="choosecat" style={{ fontFamily: "FiraGO", marginTop: "18px" }}>
+          {language === "EN" ? "Loading files..." : "ფაილები იტვირთება..."}
+        </p>
+      )}
+
+      {filesError && (
+        <p className="choosecat" style={{ fontFamily: "FiraGO", marginTop: "18px", color: "#b42318" }}>
+          {filesError}
+        </p>
+      )}
 
       <div className="filelist">
         {visibleFiles.map((file) => (
@@ -341,7 +657,7 @@ const SectionDataPage = ({
                 className={`show ${openCharts[file.id] ? "open" : ""}`}
                 onClick={(e) => {
                   e.preventDefault();
-                  toggleChart(file.id);
+                  toggleChart(file);
                 }}
                 tabIndex={-1}
               >
@@ -353,7 +669,7 @@ const SectionDataPage = ({
             )}
             <a
               className="download"
-              href={file.href}
+              href={language === "EN" ? file.hrefEN || file.href : file.hrefGE || file.href}
               target="_blank"
               rel="noreferrer"
               onClick={() => setDownloaded((prev) => ({ ...prev, [file.id]: true }))}
@@ -381,25 +697,51 @@ const SectionDataPage = ({
 
             {file.chartdata && openCharts[file.id] && (
               <div className="chart" data-id={file.id}>
-                <div className="chartswitch">
-                  <img
-                    src={barchartIcon}
-                    alt=""
-                    className={`barchart ${(chartType[file.id] || "bar") === "bar" ? "active" : ""}`}
-                    onClick={() => setFileChartType(file.id, "bar")}
-                  />
-                  <img
-                    src={linechartIcon}
-                    alt=""
-                    className={`linechart ${chartType[file.id] === "line" ? "active" : ""}`}
-                    onClick={() => setFileChartType(file.id, "line")}
-                  />
-                </div>
                 <div className="chartdiv1" id={`chartdiv1-${file.id}`}>
+                  <div className="chartswitch">
+                    <button
+                      type="button"
+                      className={`chart-toggle-btn ${(chartType[file.id] || "bar") === "bar" ? "active" : ""}`}
+                      onClick={() => setFileChartType(file.id, "bar")}
+                      aria-label={language === "EN" ? "Show bar chart" : "სვეტოვანი ჩარტის ჩვენება"}
+                    >
+                      <img src={barchartIcon} alt="" className="chart-toggle-icon" />
+                      <span className="chart-toggle-label">{language === "EN" ? "Bar" : "Bar"}</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`chart-toggle-btn ${chartType[file.id] === "line" ? "active" : ""}`}
+                      onClick={() => setFileChartType(file.id, "line")}
+                      aria-label={language === "EN" ? "Show line chart" : "ხაზოვანი ჩარტის ჩვენება"}
+                    >
+                      <img src={linechartIcon} alt="" className="chart-toggle-icon" />
+                      <span className="chart-toggle-label">{language === "EN" ? "Line" : "Line"}</span>
+                    </button>
+                  </div>
                   <HighchartsReact
                     highcharts={Highcharts}
                     options={getChartOptions(file, chartType[file.id] || "bar")}
                   />
+                  {((file.chartdata.barSeries || []).length > 1 || (file.chartdata.lineSeries || []).length > 1) && (
+                    <div className="chartseriesfilters">
+                      {getFileSeriesNames(file).map((seriesName) => {
+                        const color = getSeriesColorByName(file, seriesName);
+                        const isActive = (seriesFilters[file.id] || []).includes(seriesName);
+                        return (
+                          <button
+                            key={seriesName}
+                            type="button"
+                            className={`series-filter-btn ${isActive ? "active" : ""}`}
+                            style={isActive ? { background: color, borderColor: color } : { borderColor: color, color }}
+                            onClick={() => toggleSeriesFilter(file.id, seriesName)}
+                          >
+                            <span className="series-filter-dot" style={{ background: isActive ? "#fff" : color }} />
+                            {seriesName}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
                 <div className="chartdiv2" id={`chartdiv2-${file.id}`}>
                   <HighchartsReact highcharts={Highcharts} options={getChartOptions(file, "line")} />
