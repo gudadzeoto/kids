@@ -17,6 +17,7 @@ import Tourism from "./pages/sections/Tourism";
 import Offences from "./pages/sections/Offences";
 import NationalAccounts from "./pages/sections/NationalAccounts";
 import Infographic from "./pages/sections/Infographic";
+import Goals from "./pages/sections/Goals";
 import "./App.scss";
 
 function App() {
@@ -80,6 +81,8 @@ function App() {
           <Route path="/statistics/tourism" element={pageWrapper(Tourism)} />
           <Route path="/statistics/offences" element={pageWrapper(Offences)} />
           <Route path="/statistics/national-accounts" element={pageWrapper(NationalAccounts)} />
+          <Route path="/goals" element={pageWrapper(Goals)} />
+          <Route path="/goals/:category" element={pageWrapper(Goals)} />
           <Route path="/infographic" element={pageWrapper(Infographic)} />
         </Routes>
       </BrowserRouter>

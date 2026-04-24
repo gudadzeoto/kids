@@ -99,6 +99,7 @@ const sdgTitlesEn = [
 
 const SDGSection = ({ language }) => {
   const [hovered, setHovered] = React.useState(null);
+  const navigate = useNavigate();
   const isMobile = useWindowWidth() < 768;
   const images = language === "EN" ? sdgImagesEn : sdgImagesKa;
   const titles = language === "EN" ? sdgTitlesEn : sdgTitlesKa;
@@ -122,6 +123,7 @@ const SDGSection = ({ language }) => {
           key={i}
           onMouseEnter={() => setHovered(i)}
           onMouseLeave={() => setHovered(null)}
+          onClick={() => navigate(`/goals/${i + 1}`)}
           style={{
             cursor: "pointer",
             borderRadius: "10px",

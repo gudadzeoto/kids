@@ -5,6 +5,7 @@ const config = require("./dbConfig");
 
 const filesRoute = require("./routes/files");
 const glossaryRoute = require("./routes/glossary");
+const goalsRoute = require("./routes/goals");
 
 
 const app = express();
@@ -29,6 +30,7 @@ app.use(express.json());
 // routes
 app.use("/api/files", filesRoute);
 app.use("/api/glossary", glossaryRoute);
+app.use("/api/goals", goalsRoute);
 
 // health check with database status
 app.get("/", async (req, res) => {
