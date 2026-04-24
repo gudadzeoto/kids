@@ -218,7 +218,14 @@ const Footer = ({ language = "GE", onGlossaryOpen = () => {} }) => {
 
         <div className="text-center md:text-left">
           <h3 className="font-semibold text-lg mb-4">
-            {isEN ? "Terms of Use" : "მონაცემთა გამოყენების პირობები"}
+            <a
+              href="https://www.geostat.ge/ka/page/monacemta-gamoyenebis-pirobebi"
+              target="_blank"
+              rel="noreferrer"
+              style={{ color: "white" }}
+            >
+              {isEN ? "Terms of Use" : "მონაცემთა გამოყენების პირობები"}
+            </a>
           </h3>
         </div>
         </div>
