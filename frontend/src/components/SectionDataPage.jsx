@@ -123,15 +123,21 @@ const getSeriesColorByName = (file, seriesName) => {
 const parseChartData = (rawChartData) => {
   if (!rawChartData) return null;
 
+  const stripTrailingCommas = (value) => String(value).replace(/,\s*([}\]])/g, "$1");
+
   const parsedValue = typeof rawChartData === "string"
     ? (() => {
         const base = rawChartData.trim();
         const candidates = [
           base,
+          stripTrailingCommas(base),
           // Some DB rows store JSON with escaped newlines/tabs (e.g. "\\n").
           base.replace(/\\r\\n|\\n|\\r/g, " ").replace(/\\t/g, " "),
+          stripTrailingCommas(base.replace(/\\r\\n|\\n|\\r/g, " ").replace(/\\t/g, " ")),
           base.replace(/\\"/g, '"'),
+          stripTrailingCommas(base.replace(/\\"/g, '"')),
           base.replace(/\\"/g, '"').replace(/\\r\\n|\\n|\\r/g, " ").replace(/\\t/g, " "),
+          stripTrailingCommas(base.replace(/\\"/g, '"').replace(/\\r\\n|\\n|\\r/g, " ").replace(/\\t/g, " ")),
         ];
 
         for (const candidate of candidates) {
@@ -173,11 +179,11 @@ const parseChartData = (rawChartData) => {
     return {
       labels: parsedValue.map((entry) => String(entry[categoryKey] ?? "")),
       barSeries: seriesKeys.map((key) => ({
-        name: key,
+        name: key.trim() || "Value",
         data: parsedValue.map((entry) => Number(entry[key]) || 0),
       })),
       lineSeries: seriesKeys.map((key) => ({
-        name: key,
+        name: key.trim() || "Value",
         data: parsedValue.map((entry) => Number(entry[key]) || 0),
       })),
     };
