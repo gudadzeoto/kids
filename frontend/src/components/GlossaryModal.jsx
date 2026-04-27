@@ -22,7 +22,7 @@ const GlossaryModal = ({ language, onClose }) => {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    fetch(`/api/glossary?lang=${lang}`)
+    fetch(`${import.meta.env.VITE_API_URL}/api/glossary?lang=${lang}`)
       .then((res) => {
         if (!res.ok) throw new Error("Server error");
         return res.json();
